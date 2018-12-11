@@ -1,0 +1,2 @@
+defmodule Coffex do
+end
