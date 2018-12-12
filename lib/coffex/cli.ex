@@ -84,6 +84,11 @@ defmodule Coffex.CLI do
   end
 
   def decode_response({:error, %{reason: reason}}, _sub_resource) do
+    IO.puts("Error: #{reason}")
+    System.halt(2)
+  end
+
+  def decode_response({:error, %{"errorCode" => _status, "message" => reason}}, _sub_resource) do
     IO.puts("Error fetching from Football-Data: #{reason}")
     System.halt(2)
   end
