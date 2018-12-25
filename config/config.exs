@@ -30,4 +30,4 @@ use Mix.Config
 #     import_config "#{Mix.env}.exs"
 
 # Config the football-data.org api token here
-config :coffex, api_token: "<api-token>"
+config :coffex, api_token: ""

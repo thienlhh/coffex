@@ -24,7 +24,7 @@ defmodule Coffex.MixProject do
     [
       {:scribe, "~> 0.8"},
       {:cli_spinners, "~> 0.1.0"},
-      {:ex_football, "~> 0.1.0"}
+      {:ex_football, "~> 0.2.0"},
     ]
   end
 

@@ -51,8 +51,7 @@ defmodule Coffex.CLI do
   end
 
   def process({resource, sub_resource, params}) do
-    ExFootball.Client.new(%ExFootball.Client{}, @api_token)
-    |> ExFootball.fetch(resource, sub_resource, params)
+    ExFootball.fetch(@api_token, resource, sub_resource, params)
     |> decode_response(sub_resource)
   end
 
