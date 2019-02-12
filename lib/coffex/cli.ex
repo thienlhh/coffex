@@ -1,9 +1,17 @@
 defmodule Coffex.CLI do
+  # Default option to show next 4 matches
   @default_cmd "next"
-  @default_resource "competitions"
+  
+  # Default counter items to show
   @default_count 4
+  
+  # Gets the api token from application configs
   @api_token Application.get_env(:coffex, :api_token)
+  
+  # Initializes the ExFootball api client struct
+  @client ExFootball.Client.new(@api_token)
 
+  # Runs the CLI according to the command line arguments
   def main(argv) do
     argv
     |> parse_args()
@@ -29,35 +37,41 @@ defmodule Coffex.CLI do
   end
 
   def request_data({code, "next"}) do
-    {@default_resource, "matches", [{:id, code}, {:status, "SCHEDULED"}]}
+    {"matches", [{:id, code}, {:status, "SCHEDULED"}]}
   end
 
   def request_data({code, "top"}) do
-    {@default_resource, "standings", [{:id, code}, {:type, "TOTAL"}]}
+    {"standings", [{:id, code}, {:type, "TOTAL"}]}
   end
 
   def request_data({code, "top-scorers"}) do
-    {@default_resource, "scorers", [{:id, code}]}
+    {"scorers", [{:id, code}]}
+  end
+  
+  def request_data(_) do
+    IO.puts("Invalid option")
+    IO.puts("---")
+    process(:help)
   end
 
-  def league_code(league) do
-    case league do
-      "premier" -> "PL"
-      "laliga" -> "PD"
-      "serieA" -> "SA"
-      "bundesliga" -> "BL1"
-      _ -> "PL"
-    end
+  def process({"matches", params}) do
+    ExFootball.Competition.matches!(@client, Keyword.get(params, :id), params)
+    |> decode_response("matches")
   end
-
-  def process({resource, sub_resource, params}) do
-    ExFootball.fetch(@api_token, resource, sub_resource, params)
-    |> decode_response(sub_resource)
+  
+  def process({"standings", params}) do
+    ExFootball.Competition.standings!(@client, Keyword.get(params, :id), params)
+    |> decode_response("standings")
+  end
+  
+  def process({"scorers", params}) do
+    ExFootball.Competition.scorers!(@client, Keyword.get(params, :id), params)
+    |> decode_response("scorers")
   end
 
   def process(:help) do
     IO.puts("""
-    usage: coffex <league> <option>
+    usage: coffex [league] [option]
 
     league:
       premier:                Premier League (England)
@@ -73,8 +87,18 @@ defmodule Coffex.CLI do
 
     System.halt()
   end
+  
+  def league_code(league) do
+    case league do
+      "premier" -> "PL"
+      "laliga" -> "PD"
+      "serieA" -> "SA"
+      "bundesliga" -> "BL1"
+      _ -> "PL"
+    end
+  end
 
-  def decode_response({:ok, body}, sub_resource) do
+  def decode_response(%{status: 200, body: body}, sub_resource) do
     case sub_resource do
       "matches" -> print_matches(body[sub_resource])
       "standings" -> print_teams(body[sub_resource])
@@ -82,13 +106,8 @@ defmodule Coffex.CLI do
     end
   end
 
-  def decode_response({:error, %{reason: reason}}, _sub_resource) do
-    IO.puts("Error: #{reason}")
-    System.halt(2)
-  end
-
-  def decode_response({:error, %{"errorCode" => _status, "message" => reason}}, _sub_resource) do
-    IO.puts("Error fetching from Football-Data: #{reason}")
+  def decode_response(%{status: _, body: body}, _sub_resource) do
+    IO.puts("Error: #{body["message"]}")
     System.halt(2)
   end
 

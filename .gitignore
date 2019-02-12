@@ -26,3 +26,5 @@ coffex-*.tar
 
 .vscode
 
+/config/secret.exs
+

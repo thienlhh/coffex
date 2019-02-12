@@ -29,5 +29,5 @@ use Mix.Config
 #
 #     import_config "#{Mix.env}.exs"
 
-# Config the football-data.org api token here
-config :coffex, api_token: ""
+# Imports the secret.exs file
+import_config "secret.exs"
