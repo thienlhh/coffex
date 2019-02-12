@@ -5,7 +5,7 @@ Coffex is A football CLI written in Elixir. Provides informations about popular 
 - Make sure [erlang](http://www.erlang.org/) was installed
 - On Windows machines add `escript` before `coffex` command
 ```
-usage: coffex <league> <option>
+usage: coffex [league] [option]
 
 league:
   premier:                Premier League (England)
@@ -27,7 +27,7 @@ The steps to run `coffex` in local machines
 ```
 > git clone https://github.com/thienlhh/coffex.git
 ```
-- Configs your `api token` in the `config.exs` file
+- Configs your `api token` in the `secret.exs` file and import it in `config.exs` file, creating one if you don't have it.
 ```
 # Config the football-data.org api token here
 config :coffex, api_token: "<your-api-token>"
