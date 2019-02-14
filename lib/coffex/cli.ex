@@ -1,13 +1,13 @@
 defmodule Coffex.CLI do
   # Default option to show next 4 matches
-  @default_cmd "next"
-  
+  @default_option "next"
+
   # Default counter items to show
   @default_count 4
-  
+
   # Gets the api token from application configs
   @api_token Application.get_env(:coffex, :api_token)
-  
+
   # Initializes the ExFootball api client struct
   @client ExFootball.Client.new(@api_token)
 
@@ -29,10 +29,16 @@ defmodule Coffex.CLI do
   end
 
   def args_processing([league]) do
-    request_data({league_code(league), @default_cmd})
+    request_data({league_code(league), @default_option})
   end
 
   def args_processing(_) do
+    :help
+  end
+
+  def request_data({nil, _}) do
+    IO.puts("Invalid command")
+    IO.puts("---")
     :help
   end
 
@@ -47,23 +53,23 @@ defmodule Coffex.CLI do
   def request_data({code, "top-scorers"}) do
     {"scorers", [{:id, code}]}
   end
-  
+
   def request_data(_) do
     IO.puts("Invalid option")
     IO.puts("---")
-    process(:help)
+    :help
   end
 
   def process({"matches", params}) do
     ExFootball.Competition.matches!(@client, Keyword.get(params, :id), params)
     |> decode_response("matches")
   end
-  
+
   def process({"standings", params}) do
     ExFootball.Competition.standings!(@client, Keyword.get(params, :id), params)
     |> decode_response("standings")
   end
-  
+
   def process({"scorers", params}) do
     ExFootball.Competition.scorers!(@client, Keyword.get(params, :id), params)
     |> decode_response("scorers")
@@ -71,9 +77,9 @@ defmodule Coffex.CLI do
 
   def process(:help) do
     IO.puts("""
-    usage: coffex [league] [option]
+    usage: coffex [command] [option]
 
-    league:
+    command:
       premier:                Premier League (England)
       laliga:                 La Liga (Spain)
       serieA:                 Serie A (Itali)
@@ -87,14 +93,14 @@ defmodule Coffex.CLI do
 
     System.halt()
   end
-  
+
   def league_code(league) do
     case league do
       "premier" -> "PL"
       "laliga" -> "PD"
       "serieA" -> "SA"
       "bundesliga" -> "BL1"
-      _ -> "PL"
+      _ -> nil
     end
   end
 
